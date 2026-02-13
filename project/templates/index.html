@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Симулятор каршеринга - Волков Сергей Дмитриевич</title>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=ваш-ключ-API&lang=ru_RU" type="text/javascript"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+        
+        .student-info {
+            background: #34495e;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 1rem;
+            padding: 1rem;
+            height: calc(100vh - 120px);
+        }
+
+        .car-list-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            overflow-y: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .car-list-panel h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        .filter-form {
+            margin-bottom: 1.5rem;
+        }
+        
+        .filter-form select, .filter-form input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .car-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .car-item:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .car-item.selected {
+            border: 2px solid #3498db;
+            background: #ebf5ff;
+        }
+        
+        .car-model {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .car-details {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.3rem;
+        }
+        
+        .car-price {
+            color: #27ae60;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        
+        .fuel-level {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            background: #e1f5e1;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .map-panel {
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .control-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            overflow-y: auto;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .selected-car-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .selected-car-info h4 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .timer-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
+            color: #2c3e50;
+            font-family: monospace;
+        }
+        
+        .cost-display {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
+            color: #27ae60;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #219a52;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 0.8rem;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification.success {
+            border-left: 4px solid #27ae60;
+        }
+        
+        .notification.error {
+            border-left: 4px solid #e74c3c;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .map-panel {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🚗 Симулятор каршеринга</h1>
+   
+    </header>
+
+    <div class="main-container">
+        <div class="car-list-panel">
+            <h3>📋 Доступные автомобили</h3>
+            
+            <div class="filter-form">
+                <form method="get" id="filter-form">
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Применить фильтры</button>
+                </form>
+            </div>
+            
+            <div id="car-list">
+                {% for car in cars %}
+                <div class="car-item" data-car-id="{{ car.id }}" onclick="selectCar({{ car.id }})">
+                    <div class="car-model">{{ car.model }}</div>
+                    <div class="car-details">
+                        {{ car.color }} | {{ car.license_plate }}<br>
+                        <span class="fuel-level">⛽ Топливо: {{ car.fuel_level }}%</span>
+                    </div>
+                    <div class="car-price">{{ car.price_per_minute }} ₽/мин</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="map-panel">
+            <div id="map"></div>
+        </div>
+        
+        <div class="control-panel">
+            <h3>🚘 Управление поездкой</h3>
+            
+            <div id="selected-car-info" class="selected-car-info">
+                <h4>Выберите автомобиль</h4>
+                <p>Кликните на маркер на карте или в списке слева</p>
+            </div>
+            
+            <div id="trip-controls" style="display: none;">
+                <div class="timer-display" id="timer">00:00</div>
+                <div class="cost-display" id="cost">0 ₽</div>
+                
+                <button class="btn btn-success" id="start-trip-btn" onclick="startTrip()">Начать поездку</button>
+                <button class="btn btn-danger" id="end-trip-btn" onclick="endTrip()" style="display: none;">Завершить поездку</button>
+            </div>
+            
+            <div id="trip-active-info" style="display: none;">
+                <p>⏱️ Время поездки: <span id="trip-timer">00:00</span></p>
+                <p>💰 Текущая стоимость: <span id="trip-cost">0</span> ₽</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        © 2026 Симулятор каршеринга | Учебный проект | АНПОО «Сургутский институт экономики, управления и права»
+    </footer>
+    
+    <script>
+        let map, placemarks = [];
+        let selectedCarId = null;
+        let currentTripId = null;
+        let timerInterval = null;
+        let tripStartTime = null;
+        let pricePerMinute = 0;
+        let currentCost = 0;
+
+        ymaps.ready(initMap);
+        
+        function initMap() {
+            map = new ymaps.Map('map', {
+                center: [61.254, 73.396],
+                zoom: 14,
+                controls: ['zoomControl', 'fullscreenControl']
+            });
+            
+            loadCars();
+        }
+        
+
+        function loadCars() {
+            fetch('/api/cars/')
+                .then(response => response.json())
+                .then(data => {
+                    placemarks.forEach(pm => map.geoObjects.remove(pm));
+                    placemarks = [];
+                    
+                    data.cars.forEach(car => {
+                        const placemark = new ymaps.Placemark(
+                            [car.latitude, car.longitude],
+                            {
+                                balloonContent: `
+                                    <strong>${car.model}</strong><br>
+                                    Цвет: ${car.color}<br>
+                                    Номер: ${car.license_plate}<br>
+                                    Топливо: ${car.fuel_level}%<br>
+                                    Цена: ${car.price_per_minute} ₽/мин
+                                `,
+                                hintContent: car.model
+                            },
+                            {
+                                preset: 'islands#blueCarIcon',
+                                draggable: false
+                            }
+                        );
+                        
+                        placemark.events.add('click', () => {
+                            selectCar(car.id);
+                        });
+                        
+                        map.geoObjects.add(placemark);
+                        placemarks.push(placemark);
+                    });
+                });
+        }
+
+        function selectCar(carId) {
+            selectedCarId = carId;
+
+            document.querySelectorAll('.car-item').forEach(item => {
+                if (item.dataset.carId == carId) {
+                    item.classList.add('selected');
+
+                    const model = item.querySelector('.car-model').textContent;
+                    const details = item.querySelector('.car-details').innerHTML;
+                    const price = parseFloat(item.querySelector('.car-price').textContent);
+                    
+                    document.getElementById('selected-car-info').innerHTML = `
+                        <h4>Выбран автомобиль:</h4>
+                        <p><strong>${model}</strong></p>
+                        <p>${details}</p>
+                        <p class="car-price">${price} ₽/мин</p>
+                    `;
+                    
+                    pricePerMinute = price;
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+
+            document.getElementById('trip-controls').style.display = 'block';
+        }
+
+        function startTrip() {
+            if (!selectedCarId) {
+                showNotification('Выберите автомобиль!', 'error');
+                return;
+            }
+            
+            fetch('/api/start-trip/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    car_id: selectedCarId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentTripId = data.trip_id;
+                    tripStartTime = new Date(data.start_time);
+
+                    document.getElementById('start-trip-btn').style.display = 'none';
+                    document.getElementById('end-trip-btn').style.display = 'block';
+
+                    startTimer();
+                    
+                    showNotification('Поездка начата!', 'success');
+                }
+            });
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const now = new Date();
+                const diff = Math.floor((now - tripStartTime) / 1000); 
+                
+                const minutes = Math.floor(diff / 60);
+                const seconds = diff % 60;
+                
+                document.getElementById('timer').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+                const billableMinutes = Math.ceil(diff / 60);
+                currentCost = billableMinutes * pricePerMinute;
+                document.getElementById('cost').textContent = `${currentCost.toFixed(2)} ₽`;
+            }, 1000);
+        }
+
+        function endTrip() {
+            if (!currentTripId) return;
+            
+            fetch('/api/end-trip/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    trip_id: currentTripId,
+                    final_cost: currentCost
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    clearInterval(timerInterval);
+                    
+                    showNotification(`Поездка завершена! Итоговая стоимость: ${currentCost.toFixed(2)} ₽`, 'success');
+                    
+                    resetInterface();
+                    
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                }
+            });
+        }
+        
+        function resetInterface() {
+            selectedCarId = null;
+            currentTripId = null;
+            tripStartTime = null;
+            
+            document.getElementById('start-trip-btn').style.display = 'block';
+            document.getElementById('end-trip-btn').style.display = 'none';
+            document.getElementById('timer').textContent = '00:00';
+            document.getElementById('cost').textContent = '0 ₽';
+            document.getElementById('selected-car-info').innerHTML = `
+                <h4>Выберите автомобиль</h4>
+                <p>Кликните на маркер на карте или в списке слева</p>
+            `;
+            
+            document.querySelectorAll('.car-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        setInterval(loadCars, 30000);
+    </script>
+</body>
+</html>
