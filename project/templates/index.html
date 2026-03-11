@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Симулятор каршеринга - Волков Сергей Дмитриевич</title>
     <script src="https://api-maps.yandex.ru/2.1/?apikey=ваш-ключ-API&lang=ru_RU" type="text/javascript"></script>
+    <!-- Добавляем Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Добавляем анимации -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         * {
             margin: 0;
@@ -14,115 +18,184 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #333;
         }
         
         .header {
-            background: #2c3e50;
+            background: rgba(44, 62, 80, 0.95);
+            backdrop-filter: blur(10px);
             color: white;
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         
         .header h1 {
-            font-size: 1.5rem;
-            font-weight: 500;
+            font-size: 1.8rem;
+            font-weight: 600;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         .student-info {
-            background: #34495e;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            background: rgba(52, 73, 94, 0.8);
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
         .main-container {
             display: grid;
-            grid-template-columns: 300px 1fr 300px;
-            gap: 1rem;
-            padding: 1rem;
-            height: calc(100vh - 120px);
+            grid-template-columns: 320px 1fr 320px;
+            gap: 1.2rem;
+            padding: 1.2rem;
+            height: calc(100vh - 140px);
+            max-width: 1920px;
+            margin: 0 auto;
         }
 
+        /* Левая панель - автомобили */
         .car-list-panel {
-            background: white;
-            border-radius: 10px;
-            padding: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.2rem;
             overflow-y: auto;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
         .car-list-panel h3 {
-            margin-bottom: 1rem;
+            margin-bottom: 1.2rem;
             color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.3rem;
         }
         
         .filter-form {
             margin-bottom: 1.5rem;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 12px;
         }
         
         .filter-form select, .filter-form input {
             width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+        
+        .filter-form select:focus, .filter-form input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
         .car-item {
-            border: 1px solid #eee;
-            border-radius: 8px;
+            background: white;
+            border: 2px solid transparent;
+            border-radius: 12px;
             padding: 1rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .car-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
         
         .car-item:hover {
-            background: #f8f9fa;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+        
+        .car-item:hover::before {
+            opacity: 1;
         }
         
         .car-item.selected {
-            border: 2px solid #3498db;
-            background: #ebf5ff;
+            background: linear-gradient(135deg, #f5f7ff, #e8ecff);
+            border-color: #667eea;
+        }
+        
+        .car-item.selected::before {
+            opacity: 1;
         }
         
         .car-model {
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
         .car-details {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: #666;
-            margin-top: 0.3rem;
+            margin-top: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
         
         .car-price {
             color: #27ae60;
             font-weight: bold;
             margin-top: 0.5rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
         }
         
         .fuel-level {
-            display: inline-block;
-            padding: 0.2rem 0.5rem;
-            background: #e1f5e1;
-            border-radius: 12px;
-            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.3rem 0.8rem;
+            background: linear-gradient(135deg, #e1f5e1, #c8e6c9);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #2e7d32;
         }
 
+        /* Карта */
         .map-panel {
             background: #e9ecef;
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
         #map {
@@ -130,201 +203,395 @@
             height: 100%;
         }
 
+        /* Правая панель - управление */
         .control-panel {
-            background: white;
-            border-radius: 10px;
-            padding: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.2rem;
             overflow-y: auto;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
         .selected-car-info {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+            border-left: 4px solid #667eea;
         }
         
         .selected-car-info h4 {
             color: #2c3e50;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
         .timer-display {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: bold;
             text-align: center;
             margin: 1rem 0;
             color: #2c3e50;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .cost-display {
-            font-size: 1.8rem;
+            font-size: 2.2rem;
             font-weight: bold;
             text-align: center;
             margin: 1rem 0;
             color: #27ae60;
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            padding: 1rem;
+            border-radius: 12px;
         }
         
         .btn {
             display: block;
             width: 100%;
-            padding: 0.8rem;
-            margin: 0.5rem 0;
+            padding: 1rem;
+            margin: 0.8rem 0;
             border: none;
-            border-radius: 5px;
-            font-size: 1rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
         }
         
         .btn-primary {
-            background: #3498db;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
         
         .btn-primary:hover {
-            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
         
         .btn-success {
-            background: #27ae60;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
             color: white;
         }
         
         .btn-success:hover {
-            background: #219a52;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.4);
         }
         
         .btn-danger {
-            background: #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
         }
         
         .btn-danger:hover {
-            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
         }
         
         .btn:disabled {
             background: #bdc3c7;
+            transform: none;
+            box-shadow: none;
             cursor: not-allowed;
         }
 
+        /* Статистика */
+        .stats-panel {
+            margin-top: 1.2rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+        }
+        
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .stats-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stats-label {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stats-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
         .footer {
-            background: #2c3e50;
+            background: rgba(44, 62, 80, 0.95);
+            backdrop-filter: blur(10px);
             color: white;
             text-align: center;
-            padding: 0.8rem;
+            padding: 1rem;
             position: fixed;
             bottom: 0;
             width: 100%;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            z-index: 100;
         }
 
         .notification {
             position: fixed;
-            top: 20px;
+            top: 80px;
             right: 20px;
             background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
             z-index: 1000;
-            animation: slideIn 0.3s;
+            animation: slideInRight 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 300px;
+            border-left: 4px solid;
         }
         
-        @keyframes slideIn {
+        @keyframes slideInRight {
             from {
-                transform: translateX(100%);
+                transform: translateX(100%) rotate(10deg);
                 opacity: 0;
             }
             to {
-                transform: translateX(0);
+                transform: translateX(0) rotate(0);
                 opacity: 1;
             }
         }
         
         .notification.success {
-            border-left: 4px solid #27ae60;
+            border-left-color: #27ae60;
         }
         
         .notification.error {
-            border-left: 4px solid #e74c3c;
+            border-left-color: #e74c3c;
+        }
+        
+        .notification.info {
+            border-left-color: #3498db;
+        }
+        
+        .notification i {
+            font-size: 1.5rem;
+        }
+        
+        .notification.success i {
+            color: #27ae60;
+        }
+        
+        .notification.error i {
+            color: #e74c3c;
+        }
+        
+        .notification.info i {
+            color: #3498db;
         }
 
-        @media (max-width: 768px) {
+        /* Загрузка */
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 280px 1fr 280px;
+            }
+        }
+        
+        @media (max-width: 992px) {
             .main-container {
                 grid-template-columns: 1fr;
                 height: auto;
+                gap: 1rem;
             }
             
             .map-panel {
-                height: 400px;
+                height: 500px;
+            }
+            
+            .car-list-panel, .control-panel {
+                max-height: 400px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .timer-display {
+                font-size: 2.5rem;
+            }
+            
+            .cost-display {
+                font-size: 1.8rem;
             }
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <h1>🚗 Симулятор каршеринга</h1>
-   
+    <header class="header animate__animated animate__fadeInDown">
+        <h1><i class="fas fa-car"></i> Симулятор каршеринга</h1>
+        <div class="student-info">
+            <i class="fas fa-user-graduate"></i> Волков Сергей Дмитриевич
+        </div>
     </header>
 
     <div class="main-container">
-        <div class="car-list-panel">
-            <h3>📋 Доступные автомобили</h3>
+        <!-- Левая панель - список автомобилей -->
+        <div class="car-list-panel animate__animated animate__fadeInLeft">
+            <h3><i class="fas fa-list"></i> Доступные автомобили</h3>
             
             <div class="filter-form">
                 <form method="get" id="filter-form">
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary">Применить фильтры</button>
+                    <div class="form-group">
+                        <i class="fas fa-car-side"></i>
+                        {{ form.as_p }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Применить фильтры
+                    </button>
                 </form>
             </div>
             
-            <div id="car-list">
+            <div id="car-list" class="car-list">
                 {% for car in cars %}
-                <div class="car-item" data-car-id="{{ car.id }}" onclick="selectCar({{ car.id }})">
-                    <div class="car-model">{{ car.model }}</div>
-                    <div class="car-details">
-                        {{ car.color }} | {{ car.license_plate }}<br>
-                        <span class="fuel-level">⛽ Топливо: {{ car.fuel_level }}%</span>
+                <div class="car-item animate__animated animate__fadeIn" data-car-id="{{ car.id }}" onclick="selectCar({{ car.id }})">
+                    <div class="car-model">
+                        <i class="fas fa-car"></i> {{ car.model }}
                     </div>
-                    <div class="car-price">{{ car.price_per_minute }} ₽/мин</div>
+                    <div class="car-details">
+                        <span><i class="fas fa-palette"></i> {{ car.color }}</span>
+                        <span><i class="fas fa-id-card"></i> {{ car.license_plate }}</span>
+                        <span class="fuel-level">
+                            <i class="fas fa-gas-pump"></i> {{ car.fuel_level }}%
+                        </span>
+                    </div>
+                    <div class="car-price">
+                        <i class="fas fa-tag"></i> {{ car.price_per_minute }} ₽/мин
+                    </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
         
-        <div class="map-panel">
+        <!-- Центральная панель - карта -->
+        <div class="map-panel animate__animated animate__fadeInUp">
             <div id="map"></div>
         </div>
         
-        <div class="control-panel">
-            <h3>🚘 Управление поездкой</h3>
+        <!-- Правая панель - управление -->
+        <div class="control-panel animate__animated animate__fadeInRight">
+            <h3><i class="fas fa-cog"></i> Управление поездкой</h3>
             
             <div id="selected-car-info" class="selected-car-info">
-                <h4>Выберите автомобиль</h4>
-                <p>Кликните на маркер на карте или в списке слева</p>
+                <h4><i class="fas fa-info-circle"></i> Информация</h4>
+                <p><i class="fas fa-mouse-pointer"></i> Выберите автомобиль на карте или в списке</p>
             </div>
             
             <div id="trip-controls" style="display: none;">
-                <div class="timer-display" id="timer">00:00</div>
-                <div class="cost-display" id="cost">0 ₽</div>
+                <div class="timer-display" id="timer">
+                    <i class="fas fa-clock"></i> 00:00
+                </div>
+                <div class="cost-display" id="cost">
+                    <i class="fas fa-ruble-sign"></i> 0 ₽
+                </div>
                 
-                <button class="btn btn-success" id="start-trip-btn" onclick="startTrip()">Начать поездку</button>
-                <button class="btn btn-danger" id="end-trip-btn" onclick="endTrip()" style="display: none;">Завершить поездку</button>
+                <button class="btn btn-success" id="start-trip-btn" onclick="startTrip()">
+                    <i class="fas fa-play"></i> Начать поездку
+                </button>
+                <button class="btn btn-danger" id="end-trip-btn" onclick="endTrip()" style="display: none;">
+                    <i class="fas fa-stop"></i> Завершить поездку
+                </button>
             </div>
             
-            <div id="trip-active-info" style="display: none;">
-                <p>⏱️ Время поездки: <span id="trip-timer">00:00</span></p>
-                <p>💰 Текущая стоимость: <span id="trip-cost">0</span> ₽</p>
+            <div id="stats-panel" class="stats-panel">
+                <h4><i class="fas fa-chart-bar"></i> Статистика</h4>
+                <div class="stats-item">
+                    <span class="stats-label"><i class="fas fa-car"></i> Всего авто:</span>
+                    <span class="stats-value" id="total-cars">{{ cars|length }}</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-label"><i class="fas fa-bolt"></i> Средняя цена:</span>
+                    <span class="stats-value" id="avg-price">0 ₽/мин</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-label"><i class="fas fa-gas-pump"></i> Средний заряд:</span>
+                    <span class="stats-value" id="avg-fuel">0%</span>
+                </div>
             </div>
         </div>
     </div>
     
-    <footer class="footer">
-        © 2026 Симулятор каршеринга | Учебный проект | АНПОО «Сургутский институт экономики, управления и права»
+    <footer class="footer animate__animated animate__fadeInUp">
+        <i class="fas fa-copyright"></i> 2026 Симулятор каршеринга | Учебный проект | АНПОО «Сургутский институт экономики, управления и права»
     </footer>
     
     <script>
@@ -335,20 +602,56 @@
         let tripStartTime = null;
         let pricePerMinute = 0;
         let currentCost = 0;
+        let userLocation = null;
+        let userPlacemark = null;
 
         ymaps.ready(initMap);
         
         function initMap() {
             map = new ymaps.Map('map', {
-                center: [61.254, 73.396],
+                center: [61.254, 73.396], // Сургут
                 zoom: 14,
-                controls: ['zoomControl', 'fullscreenControl']
+                controls: ['zoomControl', 'fullscreenControl', 'geolocationControl']
             });
             
+            // Добавляем поиск
+            const searchControl = new ymaps.control.SearchControl({
+                options: {
+                    float: 'right',
+                    noPlacemark: true
+                }
+            });
+            map.controls.add(searchControl);
+            
+            // Получаем местоположение пользователя
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    userLocation = [position.coords.latitude, position.coords.longitude];
+                    
+                    // Добавляем метку пользователя
+                    userPlacemark = new ymaps.Placemark(
+                        userLocation,
+                        {
+                            balloonContent: 'Ваше местоположение',
+                            hintContent: 'Вы здесь'
+                        },
+                        {
+                            preset: 'islands#blueCircleDotIcon',
+                            iconColor: '#3498db'
+                        }
+                    );
+                    
+                    map.geoObjects.add(userPlacemark);
+                    
+                    // Центрируем карту на пользователе
+                    map.setCenter(userLocation, 15);
+                });
+            }
+            
             loadCars();
+            updateStats();
         }
         
-
         function loadCars() {
             fetch('/api/cars/')
                 .then(response => response.json())
@@ -357,21 +660,28 @@
                     placemarks = [];
                     
                     data.cars.forEach(car => {
+                        const carColor = getCarColor(car.fuel_level);
+                        
                         const placemark = new ymaps.Placemark(
                             [car.latitude, car.longitude],
                             {
                                 balloonContent: `
-                                    <strong>${car.model}</strong><br>
-                                    Цвет: ${car.color}<br>
-                                    Номер: ${car.license_plate}<br>
-                                    Топливо: ${car.fuel_level}%<br>
-                                    Цена: ${car.price_per_minute} ₽/мин
+                                    <div style="padding: 10px;">
+                                        <h4 style="margin:0 0 10px 0; color:#2c3e50;">${car.model}</h4>
+                                        <p style="margin:5px 0;"><i class="fas fa-palette"></i> Цвет: ${car.color}</p>
+                                        <p style="margin:5px 0;"><i class="fas fa-id-card"></i> Номер: ${car.license_plate}</p>
+                                        <p style="margin:5px 0;"><i class="fas fa-gas-pump"></i> Топливо: ${car.fuel_level}%</p>
+                                        <p style="margin:5px 0; color:#27ae60;"><i class="fas fa-tag"></i> ${car.price_per_minute} ₽/мин</p>
+                                        <button onclick="selectCar(${car.id})" style="width:100%; padding:8px; background:#667eea; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:10px;">
+                                            <i class="fas fa-car"></i> Выбрать
+                                        </button>
+                                    </div>
                                 `,
-                                hintContent: car.model
+                                hintContent: `${car.model} - ${car.price_per_minute} ₽/мин`
                             },
                             {
-                                preset: 'islands#blueCarIcon',
-                                draggable: false
+                                preset: 'islands#carIcon',
+                                iconColor: carColor
                             }
                         );
                         
@@ -382,34 +692,121 @@
                         map.geoObjects.add(placemark);
                         placemarks.push(placemark);
                     });
+
+                    // Рассчитываем расстояние до пользователя
+                    if (userLocation) {
+                        data.cars.forEach(car => {
+                            const distance = calculateDistance(
+                                userLocation[0], userLocation[1],
+                                car.latitude, car.longitude
+                            );
+                            car.distance = distance;
+                        });
+                        
+                        // Сортируем по расстоянию
+                        data.cars.sort((a, b) => a.distance - b.distance);
+                        
+                        // Обновляем список с отображением расстояния
+                        updateCarListWithDistance(data.cars);
+                    }
                 });
+        }
+
+        function getCarColor(fuelLevel) {
+            if (fuelLevel > 70) return '#27ae60';
+            if (fuelLevel > 30) return '#f39c12';
+            return '#e74c3c';
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Радиус Земли в км
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function updateCarListWithDistance(cars) {
+            const carList = document.getElementById('car-list');
+            carList.innerHTML = '';
+            
+            cars.forEach(car => {
+                const carItem = document.createElement('div');
+                carItem.className = 'car-item animate__animated animate__fadeIn';
+                carItem.dataset.carId = car.id;
+                carItem.onclick = () => selectCar(car.id);
+                
+                carItem.innerHTML = `
+                    <div class="car-model">
+                        <i class="fas fa-car"></i> ${car.model}
+                    </div>
+                    <div class="car-details">
+                        <span><i class="fas fa-palette"></i> ${car.color}</span>
+                        <span><i class="fas fa-id-card"></i> ${car.license_plate}</span>
+                        <span class="fuel-level" style="background: ${getFuelColor(car.fuel_level)}">
+                            <i class="fas fa-gas-pump"></i> ${car.fuel_level}%
+                        </span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                        <span class="car-price">
+                            <i class="fas fa-tag"></i> ${car.price_per_minute} ₽/мин
+                        </span>
+                        ${car.distance ? `
+                            <span style="font-size:0.85rem; color:#666;">
+                                <i class="fas fa-location-arrow"></i> ${car.distance.toFixed(1)} км
+                            </span>
+                        ` : ''}
+                    </div>
+                `;
+                
+                carList.appendChild(carItem);
+            });
+        }
+
+        function getFuelColor(fuelLevel) {
+            if (fuelLevel > 70) return 'linear-gradient(135deg, #e1f5e1, #c8e6c9)';
+            if (fuelLevel > 30) return 'linear-gradient(135deg, #fff3e0, #ffe0b2)';
+            return 'linear-gradient(135deg, #ffebee, #ffcdd2)';
         }
 
         function selectCar(carId) {
             selectedCarId = carId;
 
+            // Анимация выбора
             document.querySelectorAll('.car-item').forEach(item => {
                 if (item.dataset.carId == carId) {
                     item.classList.add('selected');
-
+                    item.classList.add('animate__pulse');
+                    
                     const model = item.querySelector('.car-model').textContent;
                     const details = item.querySelector('.car-details').innerHTML;
                     const price = parseFloat(item.querySelector('.car-price').textContent);
                     
                     document.getElementById('selected-car-info').innerHTML = `
-                        <h4>Выбран автомобиль:</h4>
+                        <h4><i class="fas fa-check-circle" style="color:#27ae60;"></i> Выбран автомобиль:</h4>
                         <p><strong>${model}</strong></p>
                         <p>${details}</p>
-                        <p class="car-price">${price} ₽/мин</p>
+                        <p class="car-price"><i class="fas fa-tag"></i> ${price} ₽/мин</p>
                     `;
                     
                     pricePerMinute = price;
+                    
+                    setTimeout(() => {
+                        item.classList.remove('animate__pulse');
+                    }, 1000);
                 } else {
                     item.classList.remove('selected');
                 }
             });
 
             document.getElementById('trip-controls').style.display = 'block';
+            
+            // Показываем уведомление
+            showNotification('Автомобиль выбран!', 'success');
         }
 
         function startTrip() {
@@ -417,6 +814,10 @@
                 showNotification('Выберите автомобиль!', 'error');
                 return;
             }
+            
+            const startBtn = document.getElementById('start-trip-btn');
+            startBtn.innerHTML = '<span class="loader"></span> Начинаем...';
+            startBtn.disabled = true;
             
             fetch('/api/start-trip/', {
                 method: 'POST',
@@ -438,8 +839,12 @@
 
                     startTimer();
                     
-                    showNotification('Поездка начата!', 'success');
+                    showNotification('Поездка начата! Приятного пути! 🚗', 'success');
                 }
+            })
+            .finally(() => {
+                startBtn.innerHTML = '<i class="fas fa-play"></i> Начать поездку';
+                startBtn.disabled = false;
             });
         }
 
@@ -451,17 +856,24 @@
                 const minutes = Math.floor(diff / 60);
                 const seconds = diff % 60;
                 
-                document.getElementById('timer').textContent = 
-                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                document.getElementById('timer').innerHTML = `
+                    <i class="fas fa-clock"></i> ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}
+                `;
 
                 const billableMinutes = Math.ceil(diff / 60);
                 currentCost = billableMinutes * pricePerMinute;
-                document.getElementById('cost').textContent = `${currentCost.toFixed(2)} ₽`;
+                document.getElementById('cost').innerHTML = `
+                    <i class="fas fa-ruble-sign"></i> ${currentCost.toFixed(2)} ₽
+                `;
             }, 1000);
         }
 
         function endTrip() {
             if (!currentTripId) return;
+            
+            const endBtn = document.getElementById('end-trip-btn');
+            endBtn.innerHTML = '<span class="loader"></span> Завершаем...';
+            endBtn.disabled = true;
             
             fetch('/api/end-trip/', {
                 method: 'POST',
@@ -478,14 +890,24 @@
                 if (data.success) {
                     clearInterval(timerInterval);
                     
-                    showNotification(`Поездка завершена! Итоговая стоимость: ${currentCost.toFixed(2)} ₽`, 'success');
+                    showNotification(`
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <strong>Поездка завершена!</strong><br>
+                            Итоговая стоимость: ${currentCost.toFixed(2)} ₽
+                        </div>
+                    `, 'success');
                     
                     resetInterface();
                     
                     setTimeout(() => {
                         location.reload();
-                    }, 2000);
+                    }, 3000);
                 }
+            })
+            .finally(() => {
+                endBtn.innerHTML = '<i class="fas fa-stop"></i> Завершить поездку';
+                endBtn.disabled = false;
             });
         }
         
@@ -496,11 +918,11 @@
             
             document.getElementById('start-trip-btn').style.display = 'block';
             document.getElementById('end-trip-btn').style.display = 'none';
-            document.getElementById('timer').textContent = '00:00';
-            document.getElementById('cost').textContent = '0 ₽';
+            document.getElementById('timer').innerHTML = '<i class="fas fa-clock"></i> 00:00';
+            document.getElementById('cost').innerHTML = '<i class="fas fa-ruble-sign"></i> 0 ₽';
             document.getElementById('selected-car-info').innerHTML = `
-                <h4>Выберите автомобиль</h4>
-                <p>Кликните на маркер на карте или в списке слева</p>
+                <h4><i class="fas fa-info-circle"></i> Информация</h4>
+                <p><i class="fas fa-mouse-pointer"></i> Выберите автомобиль на карте или в списке</p>
             `;
             
             document.querySelectorAll('.car-item').forEach(item => {
@@ -510,16 +932,60 @@
         
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
+            notification.className = `notification ${type} animate__animated animate__fadeInRight`;
+            
+            let icon = '';
+            switch(type) {
+                case 'success':
+                    icon = '<i class="fas fa-check-circle"></i>';
+                    break;
+                case 'error':
+                    icon = '<i class="fas fa-exclamation-circle"></i>';
+                    break;
+                default:
+                    icon = '<i class="fas fa-info-circle"></i>';
+            }
+            
+            notification.innerHTML = icon + message;
             
             document.body.appendChild(notification);
             
             setTimeout(() => {
-                notification.remove();
+                notification.classList.add('animate__fadeOutRight');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
             }, 3000);
         }
-        setInterval(loadCars, 30000);
+
+        function updateStats() {
+            fetch('/api/cars/')
+                .then(response => response.json())
+                .then(data => {
+                    const totalCars = data.cars.length;
+                    const avgPrice = data.cars.reduce((sum, car) => sum + car.price_per_minute, 0) / totalCars;
+                    const avgFuel = data.cars.reduce((sum, car) => sum + car.fuel_level, 0) / totalCars;
+                    
+                    document.getElementById('total-cars').textContent = totalCars;
+                    document.getElementById('avg-price').innerHTML = `${avgPrice.toFixed(2)} <i class="fas fa-ruble-sign"></i>/мин`;
+                    document.getElementById('avg-fuel').innerHTML = `${avgFuel.toFixed(1)}%`;
+                });
+        }
+
+        // Обновляем данные каждые 30 секунд
+        setInterval(() => {
+            loadCars();
+            updateStats();
+        }, 30000);
+
+        // Добавляем обработку клавиш
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && currentTripId) {
+                if (confirm('Завершить текущую поездку?')) {
+                    endTrip();
+                }
+            }
+        });
     </script>
 </body>
 </html>
