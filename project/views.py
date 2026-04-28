@@ -94,59 +94,44 @@ def end_trip(request):
         return JsonResponse({'success': True})
 
 def init_data(request):
-    """Инициализация тестовыми данными (только для разработки)"""
+    """Инициализация тестовыми данными (15 автомобилей)"""
+    # Сначала удалим старые
+    Car.objects.all().delete()
+    
     base_lat, base_lon = 61.254, 73.396
     
     cars_data = [
-        {
-            'model': 'Kia Rio',
-            'color': 'Белый',
-            'license_plate': 'А001AA 86',
-            'fuel_level': 85,
-            'price_per_minute': 10,
-            'car_class': 'economy',
-        },
-        {
-            'model': 'Hyundai Solaris',
-            'color': 'Черный',
-            'license_plate': 'В002BB 86',
-            'fuel_level': 92,
-            'price_per_minute': 11,
-            'car_class': 'economy',
-        },
-        {
-            'model': 'Skoda Octavia',
-            'color': 'Серый',
-            'license_plate': 'Е003ЕЕ 86',
-            'fuel_level': 78,
-            'price_per_minute': 15,
-            'car_class': 'comfort',
-        },
-        {
-            'model': 'Toyota Camry',
-            'color': 'Серебристый',
-            'license_plate': 'К004КК 86',
-            'fuel_level': 95,
-            'price_per_minute': 18,
-            'car_class': 'comfort',
-        },
-        {
-            'model': 'BMW 3 Series',
-            'color': 'Синий',
-            'license_plate': 'М005ММ 86',
-            'fuel_level': 70,
-            'price_per_minute': 25,
-            'car_class': 'business',
-        },
-        {
-            'model': 'Mercedes E-Class',
-            'color': 'Черный',
-            'license_plate': 'О006ОО 86',
-            'fuel_level': 88,
-            'price_per_minute': 30,
-            'car_class': 'business',
-        },
+        {'model': 'Kia Rio', 'color': 'Белый', 'plate': 'А123АА', 'fuel': 85, 'price': 10, 'class': 'economy'},
+        {'model': 'Hyundai Solaris', 'color': 'Чёрный', 'plate': 'В456ВВ', 'fuel': 90, 'price': 11, 'class': 'economy'},
+        {'model': 'Skoda Rapid', 'color': 'Серый', 'plate': 'С789СС', 'fuel': 82, 'price': 12, 'class': 'economy'},
+        {'model': 'Lada Vesta', 'color': 'Синий', 'plate': 'Т321ТТ', 'fuel': 88, 'price': 9, 'class': 'economy'},
+        {'model': 'Volkswagen Polo', 'color': 'Красный', 'plate': 'М654ММ', 'fuel': 76, 'price': 11, 'class': 'economy'},
+        {'model': 'Renault Logan', 'color': 'Бежевый', 'plate': 'Н987НН', 'fuel': 91, 'price': 10, 'class': 'economy'},
+        {'model': 'Skoda Octavia', 'color': 'Графит', 'plate': 'О159ОО', 'fuel': 84, 'price': 15, 'class': 'comfort'},
+        {'model': 'Toyota Camry', 'color': 'Чёрный', 'plate': 'К753КК', 'fuel': 92, 'price': 18, 'class': 'comfort'},
+        {'model': 'Hyundai Elantra', 'color': 'Серебро', 'plate': 'Е246ЕЕ', 'fuel': 77, 'price': 16, 'class': 'comfort'},
+        {'model': 'Kia K5', 'color': 'Тёмный', 'plate': 'Р369РР', 'fuel': 89, 'price': 17, 'class': 'comfort'},
+        {'model': 'Mazda 6', 'color': 'Красный', 'plate': 'А951АА', 'fuel': 73, 'price': 16, 'class': 'comfort'},
+        {'model': 'BMW 3', 'color': 'Синий', 'plate': 'Х357ХХ', 'fuel': 81, 'price': 26, 'class': 'business'},
+        {'model': 'Mercedes C-Class', 'color': 'Серый', 'plate': 'У468УУ', 'fuel': 86, 'price': 28, 'class': 'business'},
+        {'model': 'Audi A4', 'color': 'Белый', 'plate': 'С579СС', 'fuel': 79, 'price': 27, 'class': 'business'},
+        {'model': 'Tesla Model 3', 'color': 'Чёрный', 'plate': 'Е681ЕЕ', 'fuel': 94, 'price': 29, 'class': 'business'},
     ]
+    
+    for car in cars_data:
+        Car.objects.create(
+            model=car['model'],
+            color=car['color'],
+            license_plate=car['plate'],
+            fuel_level=car['fuel'],
+            price_per_minute=car['price'],
+            car_class=car['class'],
+            latitude=base_lat + (random.random() - 0.5) * 0.04,
+            longitude=base_lon + (random.random() - 0.5) * 0.04,
+            is_available=True
+        )
+    
+    return JsonResponse({'success': True, 'message': f'Добавлено {len(cars_data)} автомобилей'})
 
     for i, car_data in enumerate(cars_data):
         lat_offset = (random.random() - 0.5) * 0.05
